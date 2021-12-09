@@ -1,0 +1,45 @@
+version: "2"
+
+volumes:
+  web_data:
+    external: true
+  portainer_data:
+
+services:
+  nginx:
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - web_data:/etc/nginx/certs
+      - web_data:/etc/nginx/vhost.d
+      - web_data:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    network_mode: bridge
+  lets-encrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - web_data:/etc/nginx/certs
+      - web_data:/etc/nginx/vhost.d
+      - web_data:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - DEFAULT_EMAIL=$DEFAULT_EMAIL
+    network_mode: bridge
+  portainer:
+    image: portainer/portainer-ce
+    restart: always
+    volumes:
+      - /portalavita/web:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    ports:
+      - "9000:9000"
+    network_mode: bridge
+    environment:
+      - VIRTUAL_HOST=$DNS_PORTAINER
+      - LETSENCRYPT_HOST=$DNS_PORTAINER
+      - LETSENCRYPT_EMAIL=$DEFAULT_EMAIL

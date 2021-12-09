@@ -12,9 +12,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      -/etc/nginx/certs
-      -/etc/nginx/vhost.d
-      -/usr/share/nginx/html
+      - /etc/nginx/certs
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     network_mode: bridge
   lets-encrypt:

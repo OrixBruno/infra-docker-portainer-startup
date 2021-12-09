@@ -12,18 +12,17 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - web_data:/etc/nginx/certs
-      - web_data:/etc/nginx/vhost.d
-      - web_data:/usr/share/nginx/html
+      -/etc/nginx/certs
+      -/etc/nginx/vhost.d
+      -/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     network_mode: bridge
   lets-encrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     restart: always
+    volumes_from:
+      - nginx:rw
     volumes:
-      - web_data:/etc/nginx/certs
-      - web_data:/etc/nginx/vhost.d
-      - web_data:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - DEFAULT_EMAIL=$DEFAULT_EMAIL

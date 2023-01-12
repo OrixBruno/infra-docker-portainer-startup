@@ -1,6 +1,7 @@
 version: "2"
 
 volumes:
+  certs_data:
   portainer_data:
 
 services:
@@ -11,28 +12,30 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /etc/nginx/certs
+      - certs_data:/etc/nginx/certs:ro
       - /etc/nginx/vhost.d
       - /usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
-    network_mode: bridge
   lets-encrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     restart: always
     volumes_from:
       - nginx:rw
     volumes:
+      - certs_data:/etc/nginx/certs:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - DEFAULT_EMAIL=$DEFAULT_EMAIL
-    network_mode: bridge
   portainer:
     image: portainer/portainer-ce
     restart: always
+    ports:
+      - "8000:8000"
+      - "9443:9443"
     volumes:
+      - certs_data:/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - portainer_data:/data
-    network_mode: bridge
     environment:
       - VIRTUAL_HOST=$DNS_PORTAINER
       - LETSENCRYPT_HOST=$DNS_PORTAINER

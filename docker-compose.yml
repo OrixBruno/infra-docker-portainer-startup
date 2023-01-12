@@ -1,7 +1,6 @@
 version: "2"
 
 volumes:
-  web_data:
   portainer_data:
 
 services:
@@ -31,11 +30,8 @@ services:
     image: portainer/portainer-ce
     restart: always
     volumes:
-      - /portalavita/web:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - portainer_data:/data
-    ports:
-      - "9000:9000"
     network_mode: bridge
     environment:
       - VIRTUAL_HOST=$DNS_PORTAINER

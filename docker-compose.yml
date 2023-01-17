@@ -1,42 +1,51 @@
 version: "2"
 
 volumes:
-  certs_data:
-  portainer_data:
+  certs:
+  vhost:
+  html:
+  acme:
+  portainer:
 
 services:
-  nginx:
-    image: jwilder/nginx-proxy
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
     restart: always
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - certs_data:/etc/nginx/certs:ro
-      - /etc/nginx/vhost.d
-      - /usr/share/nginx/html
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
-  lets-encrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
     restart: always
     volumes_from:
-      - nginx:rw
+      - nginx-proxy
     volumes:
-      - certs_data:/etc/nginx/certs:rw
+      - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - DEFAULT_EMAIL=$DEFAULT_EMAIL
+  ssl_active:
+    image: nginx
+    restart: always
+    environment:
+      - VIRTUAL_HOST=sslactive.$DNS
+      - LETSENCRYPT_HOST=sslactive.$DNS
+      - LETSENCRYPT_EMAIL=$DEFAULT_EMAIL
   portainer:
     image: portainer/portainer-ce
     restart: always
     ports:
-      - "8000:8000"
-      - "9443:9443"
+      - "81:8000"
+      - "82:9443"
     volumes:
-      - certs_data:/certs
+      - portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - portainer_data:/data
     environment:
-      - VIRTUAL_HOST=$DNS_PORTAINER
-      - LETSENCRYPT_HOST=$DNS_PORTAINER
+      - VIRTUAL_HOST=portainer.$DNS
+      - LETSENCRYPT_HOST=portainer.$DNS
       - LETSENCRYPT_EMAIL=$DEFAULT_EMAIL

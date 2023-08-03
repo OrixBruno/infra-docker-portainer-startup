@@ -40,8 +40,9 @@ services:
     image: portainer/portainer-ce
     restart: always
     ports:
-      - "81:8000"
-      - "82:9443"
+      - "8000:8000"
+      - "9000:9000"
+      - "9443:9443"
     volumes:
       - portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
